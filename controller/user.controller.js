@@ -17,8 +17,6 @@ const handleUserSignup = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10)
         const ismatch = await bcrypt.compare(password, hashedPassword)
-        console.log("ismatch>>>", ismatch)
-
 
         const newUser = await User.create({
             firstname,

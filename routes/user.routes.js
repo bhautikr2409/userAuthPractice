@@ -3,9 +3,9 @@ const { validateUser, userValidationSchema } = require("../validation/user.valid
 const handelUserSignup = require("../controller/user.controller")
 const userRouter = express.Router()
 
-
-
-userRouter.post("/signup", handelUserSignup.handleUserSignup)
+userRouter.post("/signup",
+    validateUser(userValidationSchema.register),
+    handelUserSignup.handleUserSignup)
 userRouter.post("/login", handelUserSignup.handleUserLogin)
 
 module.exports = userRouter

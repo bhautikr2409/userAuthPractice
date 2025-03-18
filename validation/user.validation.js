@@ -38,8 +38,9 @@ const userValidationSchema = {
         password: Joi.string()
             .min(6)
             .max(30)
-            .pattern(/^[A-Z]/) // First character must be capital
-            .pattern(/^[a-zA-Z0-9]{6,30}$/)
+            .pattern(/^[A-Z]/)
+            .pattern(/[@$&]/)
+            .pattern(/^[a-zA-Z0-9@$&]{6,30}$/)
             .required()
             .messages({
                 'string.pattern.base': 'Password must start with a capital letter and be alphanumeric (6-30 characters)',
