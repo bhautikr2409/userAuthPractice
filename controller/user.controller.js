@@ -1,5 +1,8 @@
 const User = require("../model/user.model");
 const bcrypt = require("bcrypt");
+const setUserToken = require("../service/token");
+const cookie = require("cookie-parser")
+
 
 const handleUserSignup = async (req, res) => {
     try {
@@ -45,13 +48,32 @@ const handleUserLogin = async (req, res) => {
         const { email, password } = req.body
         const varifyUser = await User.findOne({ email })
 
-        const isPassValid = await bcrypt.compare(password, varifyUser.password)
-
-        if (varifyUser && isPassValid) {
-            res.json({ message: "login successfully" })
-        } else {
-            res.json({ message: "invalid email or password" })
+        if (!varifyUser) {
+            return res.status(401).json({
+                message: "Invalid email or password"
+            });
         }
+
+        const isPassValid = await bcrypt.compare(password, varifyUser.password);
+        if (!isPassValid) {
+            return res.status(401).json({
+                message: "Invalid email or password"
+            });
+        }
+
+        // Generate token
+        const token = setUserToken(varifyUser);
+
+        return res
+            .cookie("uid", token, {
+                httpOnly: false,
+                maxAge: 24 * 60 * 60 * 1000,
+                path: '/'
+            })
+            .status(200)
+            .json({
+                message: "Login successful"
+            });
     }
     catch (err) {
         console.log('error in login>>>', err.message)
