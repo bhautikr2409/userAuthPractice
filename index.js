@@ -7,14 +7,26 @@ const port = PORT || 3001
 const cors = require("cors")
 const dbConnect = require("./dbConnect")
 const userRouter = require("./routes/user.routes")
+const cookie = require("cookie-parser")
+const path = require("path")
 
+app.set("view engine", "ejs")
+app.set("views", path.join(__dirname, "views"))
+app.use(express.urlencoded({ extended: true }));
+app.use(cookie())
 app.use(cors())
 app.use(express.json())
+
 app.use("/api/user", userRouter)
 
 app.get("/", (req, res) => {
-    res.end("app running...")
+    res.render("index")
 })
+
+app.get("/about", (req, res) => {
+    res.send("this is about page")
+})
+
 
 
 dbConnect(DB_URL, DB_NAME)

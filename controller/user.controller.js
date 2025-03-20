@@ -1,7 +1,7 @@
 const User = require("../model/user.model");
 const bcrypt = require("bcrypt");
-const setUserToken = require("../service/token");
-const cookie = require("cookie-parser")
+const { setUserToken, refreshToken } = require("../service/token");
+
 
 
 const handleUserSignup = async (req, res) => {
@@ -16,7 +16,6 @@ const handleUserSignup = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10)
-        const ismatch = await bcrypt.compare(password, hashedPassword)
 
         const newUser = await User.create({
             firstname,
@@ -26,10 +25,19 @@ const handleUserSignup = async (req, res) => {
             password: hashedPassword
         });
 
-        return res.status(201).json({
-            message: "User created successfully",
-            newUser
-        });
+        const token = setUserToken(newUser); // WORKING
+
+        return res
+            .cookie("accesstoken", token, {
+                httpOnly: false,
+                maxAge: 24 * 60 * 60 * 1000,
+                path: '/'
+            })
+            .status(201).json({
+                token,
+                message: "User created successfully",
+                newUser
+            })
 
     } catch (error) {
         console.error("Signup error:", error);
@@ -59,18 +67,18 @@ const handleUserLogin = async (req, res) => {
             });
         }
 
-        // Generate token
         const token = setUserToken(varifyUser);
 
         return res
-            .cookie("uid", token, {
-                httpOnly: false,
-                maxAge: 24 * 60 * 60 * 1000,
+            .cookie("accesstoken", token, {
+                httpOnly: true,
+                maxAge: 5 * 60 * 1000,
                 path: '/'
             })
             .status(200)
             .json({
-                message: "Login successful"
+                message: "Login successful",
+                token
             });
     }
     catch (err) {
@@ -80,7 +88,46 @@ const handleUserLogin = async (req, res) => {
 }
 
 
+const handelUserLogout = async (req, res) => {
+    try {
+        res.clearCookie("accesstoken")
+        return res.status(200).json({
+            message: "Logged out successfully"
+        });
+    }
+    catch (err) {
+        console.log('error in login>>>', err.message)
+        throw err
+    }
+}
+
+const handleTokenRefresh = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const newToken = refreshToken(userId);
+
+        return res
+            .cookie("accesstoken", newToken, {
+                httpOnly: false,
+                maxAge: 24 * 60 * 60 * 1000,
+                path: '/'
+            })
+            .status(200)
+            .json({
+                message: "Token refreshed successfully"
+            });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error refreshing token",
+            error: error.message
+        });
+    }
+};
+
+
 module.exports = {
     handleUserSignup,
-    handleUserLogin
+    handleUserLogin,
+    handelUserLogout,
+    handleTokenRefresh
 };

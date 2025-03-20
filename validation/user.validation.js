@@ -39,11 +39,15 @@ const userValidationSchema = {
             .min(6)
             .max(30)
             .pattern(/^[A-Z]/)
+            .message('Password must start with a capital letter')
             .pattern(/[@$&]/)
+            .message('Password must contain at least one special character (@, $, or &)')
+            .pattern(/[0-9]/)
+            .message('Password must contain at least one number')
             .pattern(/^[a-zA-Z0-9@$&]{6,30}$/)
+            .message('Password must be 6-30 characters long and can only contain letters, numbers, and special characters (@, $, &)')
             .required()
             .messages({
-                'string.pattern.base': 'Password must start with a capital letter and be alphanumeric (6-30 characters)',
                 'string.empty': 'Password is required',
                 'string.min': 'Password must be at least 6 characters long',
                 'string.max': 'Password cannot exceed 30 characters'
@@ -57,7 +61,7 @@ const validateUser = (validationSchema) => {
             const validated = await validationSchema.validateAsync(req.body, {
                 abortEarly: false
             });
-            req.validatedBody = validated;
+            req.validatedBody = validated; // discuss with mentor 
             next();
         } catch (error) {
             const errors = error.details.map(detail => ({
