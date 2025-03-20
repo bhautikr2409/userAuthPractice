@@ -51,13 +51,16 @@ const userValidationSchema = {
                 'string.empty': 'Password is required',
                 'string.min': 'Password must be at least 6 characters long',
                 'string.max': 'Password cannot exceed 30 characters'
-            })
+            }),
+
+
     })
 };
 
 const validateUser = (validationSchema) => {
     return async (req, res, next) => {
         try {
+
             const validated = await validationSchema.validateAsync(req.body, {
                 abortEarly: false
             });

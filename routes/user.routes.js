@@ -3,8 +3,11 @@ const { validateUser, userValidationSchema } = require("../validation/user.valid
 const handelUserSignup = require("../controller/user.controller")
 const authenticateUser = require("../middleware/auth.middleware")
 const userRouter = express.Router()
+const upload = require("../middleware/imageUploadMulter.middleware")
+
 
 userRouter.post("/signup",
+    upload.single("image"),
     validateUser(userValidationSchema.register),
     handelUserSignup.handleUserSignup)
 

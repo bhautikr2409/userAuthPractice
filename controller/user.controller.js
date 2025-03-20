@@ -6,7 +6,7 @@ const { setUserToken, refreshToken } = require("../service/token");
 
 const handleUserSignup = async (req, res) => {
     try {
-        const { firstname, lastname, age, email, password } = req.body;
+        const { firstname, lastname, age, email, password, image } = req.body;
 
         const existingUser = await User.findOne({ email })
         if (existingUser) {
@@ -22,8 +22,10 @@ const handleUserSignup = async (req, res) => {
             lastname,
             age,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            image: req.file ? req.file.filename : undefined
         });
+
 
         const token = setUserToken(newUser); // WORKING
 
