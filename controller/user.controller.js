@@ -2,7 +2,8 @@ const User = require("../model/user.model");
 const bcrypt = require("bcrypt");
 const { setUserToken, refreshToken } = require("../service/token");
 const crypto = require("crypto")
-const path = require("path")
+const path = require("path");
+const { access } = require("fs");
 
 
 const handleUserSignup = async (req, res) => {
@@ -18,7 +19,13 @@ const handleUserSignup = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10)
 
-        const imageName = crypto.randomBytes(12).toString("hex") + path.extname(req.file.originalname)
+        // const imageName = crypto.randomBytes(12).toString("hex") + path.extname(req.file.originalname)
+
+        console.log("req.cloudinaryResult >>>", req.cloudinaryResult)
+
+        const imageData = req.cloudinaryResult ? req.cloudinaryResult.secure_url : undefined;
+
+        console.log("imagedata >>", imageData)
 
         const newUser = await User.create({
             firstname,
@@ -26,7 +33,7 @@ const handleUserSignup = async (req, res) => {
             age,
             email,
             password: hashedPassword,
-            imageName: imageName
+            imageURL: imageData
         });
 
 
@@ -39,7 +46,7 @@ const handleUserSignup = async (req, res) => {
                 path: '/'
             })
             .status(201).json({
-                token,
+                access_token: token,
                 message: "User created successfully",
                 newUser
             })
