@@ -1,4 +1,3 @@
-const { string, number, required } = require("joi")
 const mongoose = require("mongoose")
 
 
@@ -23,10 +22,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    image: {
+    imageName: {
         type: String,
-        required: true
     }
+
 
 }, { timestamps: true })
 

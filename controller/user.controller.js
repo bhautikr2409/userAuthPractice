@@ -1,7 +1,8 @@
 const User = require("../model/user.model");
 const bcrypt = require("bcrypt");
 const { setUserToken, refreshToken } = require("../service/token");
-
+const crypto = require("crypto")
+const path = require("path")
 
 
 const handleUserSignup = async (req, res) => {
@@ -17,13 +18,15 @@ const handleUserSignup = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10)
 
+        const imageName = crypto.randomBytes(12).toString("hex") + path.extname(req.file.originalname)
+
         const newUser = await User.create({
             firstname,
             lastname,
             age,
             email,
             password: hashedPassword,
-            image: req.file ? req.file.filename : undefined
+            imageName: imageName
         });
 
 
@@ -126,10 +129,30 @@ const handleTokenRefresh = async (req, res) => {
     }
 };
 
+const handleImage = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+
+        if (!user || !user.imageName) {
+            return res.status(404).json({
+                message: "Image not found"
+            });
+        }
+
+        return res.send(user.imageName);
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error retrieving image",
+            error: error.message
+        });
+    }
+}
+
 
 module.exports = {
     handleUserSignup,
     handleUserLogin,
     handelUserLogout,
-    handleTokenRefresh
+    handleTokenRefresh,
+    handleImage
 };
