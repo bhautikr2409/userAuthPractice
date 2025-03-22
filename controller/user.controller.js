@@ -1,14 +1,12 @@
 const User = require("../model/user.model");
 const bcrypt = require("bcrypt");
 const { setUserToken, refreshToken } = require("../service/token");
-const crypto = require("crypto")
-const path = require("path");
-const { access } = require("fs");
+
 
 
 const handleUserSignup = async (req, res) => {
     try {
-        const { firstname, lastname, age, email, password, image } = req.body;
+        const { firstname, lastname, age, email, password } = req.body;
 
         const existingUser = await User.findOne({ email })
         if (existingUser) {
@@ -18,14 +16,7 @@ const handleUserSignup = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10)
-
-        // const imageName = crypto.randomBytes(12).toString("hex") + path.extname(req.file.originalname)
-
-        console.log("req.cloudinaryResult >>>", req.cloudinaryResult)
-
         const imageData = req.cloudinaryResult ? req.cloudinaryResult.secure_url : undefined;
-
-        console.log("imagedata >>", imageData)
 
         const newUser = await User.create({
             firstname,
@@ -136,30 +127,11 @@ const handleTokenRefresh = async (req, res) => {
     }
 };
 
-const handleImage = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.userId);
-
-        if (!user || !user.imageName) {
-            return res.status(404).json({
-                message: "Image not found"
-            });
-        }
-
-        return res.send(user.imageName);
-    } catch (error) {
-        return res.status(500).json({
-            message: "Error retrieving image",
-            error: error.message
-        });
-    }
-}
 
 
 module.exports = {
     handleUserSignup,
     handleUserLogin,
     handelUserLogout,
-    handleTokenRefresh,
-    handleImage
+    handleTokenRefresh
 };

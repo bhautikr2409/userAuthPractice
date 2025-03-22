@@ -16,13 +16,12 @@ const storage = multer.diskStorage({
     }
 })
 
-
 // const storage = multer.memoryStorage()
-
 
 const upload = multer({
     storage: storage
 });
 
+console.log("upload.single>>", upload.single)
 
 module.exports = upload
