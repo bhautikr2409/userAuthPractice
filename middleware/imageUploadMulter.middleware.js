@@ -2,11 +2,12 @@ const multer = require("multer")
 const crypto = require("crypto")
 const path = require("path")
 const fs = require("fs")
+const os = require("os")
+const osTempDir = fs.realpathSync(os.tmpdir())
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = path.join(__dirname, "..", "public", "uploadImage")
-        cb(null, uploadDir)
+        cb(null, osTempDir)
     },
     filename: function (req, file, cb) {
         crypto.randomBytes(12, (err, bytes) => {
