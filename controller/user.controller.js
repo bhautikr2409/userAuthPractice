@@ -1,6 +1,7 @@
 const User = require("../model/user.model");
 const bcrypt = require("bcrypt");
 const { setUserToken, refreshToken } = require("../service/token");
+const { validateUser, userValidationSchema } = require("../validation/user.validation");
 
 
 
@@ -27,7 +28,6 @@ const handleUserSignup = async (req, res) => {
             imageURL: imageData
         });
 
-
         const token = setUserToken(newUser); // WORKING
 
         return res
@@ -39,7 +39,8 @@ const handleUserSignup = async (req, res) => {
             .status(201).json({
                 access_token: token,
                 message: "User created successfully",
-                newUser
+                newUser,
+                isLogin: true
             })
 
     } catch (error) {
@@ -81,7 +82,8 @@ const handleUserLogin = async (req, res) => {
             .status(200)
             .json({
                 message: "Login successful",
-                token
+                token,
+                isLogin: true
             });
     }
     catch (err) {
@@ -95,7 +97,8 @@ const handelUserLogout = async (req, res) => {
     try {
         res.clearCookie("accesstoken")
         return res.status(200).json({
-            message: "Logged out successfully"
+            message: "Logged out successfully",
+            isLogin: false
         });
     }
     catch (err) {
@@ -103,6 +106,40 @@ const handelUserLogout = async (req, res) => {
         throw err
     }
 }
+
+
+
+const handleResetPass = async (req, res) => {
+    try {
+
+        const { email, password } = req.body
+
+        const user = await User.findOne({ email })
+
+        if (!user) {
+            res.json({ message: "user not found" })
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12)
+
+        if (req.cookies.accesstoken) {
+            await User.findOneAndUpdate({ password })
+        }
+
+        const newToken = refreshToken(user._id);
+
+        const updatedUser = await User.findOne({ email })
+        updatedUser.password = hashedPassword
+
+
+        res.json({ token: newToken, user: updatedUser })
+
+    }
+    catch (err) {
+        console.log("error in getting user", err)
+    }
+}
+
 
 const handleTokenRefresh = async (req, res) => {
     try {
@@ -133,5 +170,6 @@ module.exports = {
     handleUserSignup,
     handleUserLogin,
     handelUserLogout,
-    handleTokenRefresh
+    handleTokenRefresh,
+    handleResetPass
 };

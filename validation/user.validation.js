@@ -57,6 +57,37 @@ const userValidationSchema = {
     })
 };
 
+const resetPassValidtion = {
+    resetPass: Joi.object({
+
+        email: Joi.string()
+            .email()
+            .required()
+            .messages({
+                'string.email': 'Please provide a valid email',
+                'string.empty': 'Email is required'
+            }),
+
+        password: Joi.string()
+            .min(6)
+            .max(30)
+            .pattern(/^[A-Z]/)
+            .message('Password must start with a capital letter')
+            .pattern(/[@$&]/)
+            .message('Password must contain at least one special character (@, $, or &)')
+            .pattern(/[0-9]/)
+            .message('Password must contain at least one number')
+            .pattern(/^[a-zA-Z0-9@$&]{6,30}$/)
+            .message('Password must be 6-30 characters long and can only contain letters, numbers, and special characters (@, $, &)')
+            .required()
+            .messages({
+                'string.empty': 'Password is required',
+                'string.min': 'Password must be at least 6 characters long',
+                'string.max': 'Password cannot exceed 30 characters'
+            })
+    })
+}
+
 const validateUser = (validationSchema) => {
     return async (req, res, next) => {
         try {
@@ -78,5 +109,6 @@ const validateUser = (validationSchema) => {
 
 module.exports = {
     userValidationSchema,
-    validateUser
+    validateUser,
+    resetPassValidtion
 };
